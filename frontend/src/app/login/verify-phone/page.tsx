@@ -1,0 +1,117 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+export default function VerifyPhonePage() {
+  const [accessCode, setAccessCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const phone = localStorage.getItem('phoneNumber');
+    if (!phone) {
+      router.push('/login/phone');
+      return;
+    }
+    setPhoneNumber(phone);
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accessCode.trim()) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/validateAccessCode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          phoneNumber, 
+          accessCode: accessCode.trim() 
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.removeItem('phoneNumber');
+        if (data.user.role === 'instructor') {
+          router.push('/dashboard/instructor');
+        } else {
+          router.push('/dashboard/student');
+        }
+      } else {
+        alert(data.error || 'Invalid access code');
+      }
+    } catch (error) {
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+        {/* Back button */}
+        <div className="mb-6">
+          <Link href="/login/phone" className="flex items-center text-gray-600 hover:text-gray-800">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </Link>
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Verify Code</h1>
+          <p className="text-gray-600">Enter the 6-digit code sent to {phoneNumber}</p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <input
+              type="text"
+              placeholder="Enter 6-digit code"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-center text-lg tracking-widest"
+              maxLength={6}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || accessCode.length !== 6}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {loading ? 'Verifying...' : 'Verify'}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500">
+            Didn't receive code?{' '}
+            <button 
+              onClick={() => router.push('/login/phone')} 
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Try again
+            </button>
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
