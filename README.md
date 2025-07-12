@@ -4,20 +4,20 @@ A real-time classroom management tool that enables instructors to efficiently ma
 
 ## Features
 
-### 🔐 Authentication
+###  Authentication
 - SMS-based authentication using Twilio
 - Email-based authentication for students
 - JWT token-based secure sessions
 - Role-based access control (Instructor/Student)
 
-### 👥 Instructor Features
+###  Instructor Features
 - Add/Edit/Delete students
 - Assign lessons to students
 - View student progress
 - Real-time chat with students
 - Dashboard with student overview
 
-### 🎓 Student Features
+###  Student Features
 - View assigned lessons
 - Mark lessons as completed
 - Edit personal profile
