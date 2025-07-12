@@ -24,7 +24,7 @@ A real-time classroom management tool that enables instructors to efficiently ma
 - Real-time chat with instructor
 - Progress tracking
 
-### 💬 Real-time Features
+### Real-time Features
 - Socket.io powered live chat
 - Instant notifications
 - Real-time updates across devices
